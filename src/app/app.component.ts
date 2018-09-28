@@ -15,7 +15,7 @@ export class AppComponent implements OnInit {
   constructor(private postService: PostService, public dialog: MatDialog) { }
 
   ngOnInit() {
-    setInterval(this.getPosts.bind(this), 1000);
+    setInterval(this.getPosts.bind(this), 10000);
     console.log(this.posts);
   }
 
