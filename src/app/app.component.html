@@ -7,11 +7,14 @@
       <th>created_at</th>
       <th>author</th>
     </thead>
-    <tr *ngFor="let post of posts"  (click)="openDialog(post)">
-      <td>{{post.title}}</td>
-      <td>{{post.url}}</td>
-      <td>{{post.created_at}}</td>
-      <td>{{post.author}}</td>
-    </tr>
+      <tr
+        *ngFor="let post of posts"
+        (click)="openDialog(post)"
+      >
+        <td>{{post.title}}</td>
+        <td>{{post.url}}</td>
+        <td>{{post.created_at}}</td>
+        <td>{{post.author}}</td>
+      </tr>
   </table>
 </div>

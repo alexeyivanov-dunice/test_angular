@@ -1,51 +1,61 @@
-import {Component, OnInit, ElementRef, ViewChild, Inject} from '@angular/core';
-import {PostService} from "../post.service";
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
+import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { MatDialog } from '@angular/material';
+
+import { PostService } from './post/post.service';
+import { Post } from './post/post.model';
+import { DialogComponent } from './dialog/dialog.component';
+
+const POLL_TIME: number = 10 * 1000;
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   @ViewChild('myModal') myModal: ElementRef;
 
-  posts = [];
-  post = null;
-  constructor(private postService: PostService, public dialog: MatDialog) { }
+  posts: Post[] = [];
+  timeoutId: number = null;
 
-  ngOnInit() {
-    setInterval(this.getPosts.bind(this), 10000);
-    console.log(this.posts);
+  constructor(
+    private postService: PostService,
+    public dialog: MatDialog,
+  ) {
+    this.getPosts = this.getPosts.bind(this);
   }
 
-  openDialog(post): void {
-    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+  private startPolling(): void {
+    this.timeoutId = window.setTimeout(this.getPosts, POLL_TIME);
+  }
+
+  private stopPolling(): void {
+    window.clearTimeout(this.timeoutId);
+  }
+
+  public ngOnInit() {
+    this.startPolling();
+  }
+
+  public ngOnDestroy() {
+    this.stopPolling();
+  }
+
+  public getPosts(): void {
+    this.postService
+      .getPosts()
+      .subscribe((posts: any) => {
+        this.posts = posts.hits;
+        this.timeoutId = window.setTimeout(this.getPosts, POLL_TIME);
+      });
+  }
+
+  public openDialog(post: Post): void {
+    const dialogRef = this.dialog.open(DialogComponent, {
       width: '550px',
       data: JSON.stringify(post),
     });
   }
-
-  getPosts(): void {
-    this.postService.getPosts()
-      .subscribe(posts => {this.posts = posts.hits; console.log('query')});
-  }
-
-}
-
-@Component({
-  templateUrl: 'dialog.html',
-})
-export class DialogOverviewExampleDialog {
-
-  constructor(
-    public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: any) {}
-
-  onNoClick(): void {
-    this.dialogRef.close();
-  }
-
 }
 
 
